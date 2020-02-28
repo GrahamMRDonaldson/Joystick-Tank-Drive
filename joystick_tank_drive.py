@@ -6,7 +6,48 @@ import pygame
 from gpiozero import PWMLED
 from signal import pause
 from time import sleep
+from gpiozero import Servo
 
+#class for controlling pitch servos (TURRET)
+class ServoGPIO:
+    def __init__(self, PIN):    
+        self.servo = Servo(PIN) #defining servo pin for GPIO output on PI
+        self.degree = 0         #vertical degree (0 to 90)
+        self.value = -1         #value of servo (-1 to 1)
+   
+    def set_degrees(self, degree):  #FUNCTION: for setting the servo to a certain degree (0 to 90)
+        self.degree = degree        #sets the value of classes degree to inputed degree
+        self.value = degrees / 90   #gets a value from 0 - 90 and turns it to 0 - 1
+        self.value *= 2             #sets the degree ratio to a range from 0 to 2
+        self.value -= 1             #sets the degree ratio to a range from -1 to 1
+        self.servo.value = value    #setting the servo value to the value
+        
+    def set_value(self, value):     #FUNCTION: for setting the servo to a certain value (-1 to 1)
+        self.value = value          #sets the value of classes value to inputed value
+        self.degree = value + 1     #sets degree to a value from 0 to 2
+        self.degree /= 2            #sets degree to a value from 0 to 1
+        self.degree *= 90           #sets degree to a value from 0 to 90
+        self.servo.value = value    #setting the servo value to the value
+        
+    #JUST FOR DEGREES, NOT FOR VALUE
+    def __add__(self, other):           #FUNCTION: for iterating the servos degree
+        self.degree += other            #sets the value of classes value to itself + inputed value
+        self.value = self.degrees / 90  #gets a value from 0 - 90 and turns it to 0 - 1
+        self.value *= 2                 #sets the degree ratio to a range from 0 to 2
+        self.value -= 1                 #sets the degree ratio to a range from -1 to 1
+        self.servo.value = value        #setting the servo value to the value
+    
+    def __sub__(self, value):           #FUNCTION: for iterating the servos degree
+        self.degree -= other            #sets the value of classes value to itself + inputed value
+        self.value = self.degrees / 90  #gets a value from 0 - 90 and turns it to 0 - 1
+        self.value *= 2                 #sets the degree ratio to a range from 0 to 2
+        self.value -= 1                 #sets the degree ratio to a range from -1 to 1
+        self.servo.value = value        #setting the servo value to the value
+        
+    def debug(self):                              #FUNCTION: for printing out MotorDrivetrain values for debugging perposes
+        print("self.horizontal:",self.horizontal) #prints out the horizontal value
+        print("self.vertical:",self.vertical)     #prints out the vertical value
+        
 #class for controlling the left/right. AKA drivetrain
 class MotorDrivetrain:
     def __init__(self):
@@ -62,6 +103,9 @@ motor_BR = MotorGPIO('GPIO20','GPIO21') #back right motor
 #drive train
 DT = MotorDrivetrain()
 
+#defining the servo controller pins
+servo_L = ServoGPIO('GPIO24')
+servo_R = ServoGPIO('GPIO23')
 
 class PS4Controller(object):
     """Class representing the PS4 controller. Pretty straightforward functionality."""
